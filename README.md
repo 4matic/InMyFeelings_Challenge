@@ -1,3 +1,6 @@
+# Pose estimation tool
+This fork has become a tool for pose estimation.
+I did this in order to always have the opportunity to evaluate pose estimation on a single web page using images or videos.
 
 ## Coding Challenge - Due Date, August 1 2018 at 12 PM PST
 
@@ -40,4 +43,4 @@ This is a Pure Javascript implementation of [PoseNet](https://github.com/tensorf
 
 ## Credits
 
-Credits for this code go to the Tensorflow team at Google 
+Credits for this code go to the Tensorflow team at Google & Maxim Maximov

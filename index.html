@@ -52,6 +52,20 @@
         .preview .title {
           text-align: center;
         }
+        h4.or {
+          width: 100%;
+          text-align: center;
+          border-bottom: 1px solid #000;
+          line-height: 0.1em;
+          margin: 30px 0;
+        }
+        h4.or span {
+          background: #e9ecef;
+          padding: 0 10px;
+        }
+        #giphy-link-example + div {
+          display: block;
+        }
       </style>
   </head>
   <body>
@@ -63,7 +77,8 @@
           <br />
           In this demo you can process both pictures and video.
           <br/>
-          I used <span class="badge">.mp4</span> files downloaded from <a href="https://giphy.com/">Giphy.com</a>.
+          I used <span class="badge">.mp4</span> files downloaded from <a href="https://giphy.com/">Giphy.com</a>.<br />
+          <i class="text-muted">Sometimes it may happen that the video may pause without actual pausing(bug?lag?). If this happened just use the video rewind.</i>
         </p>
         <form class="submit-form">
           <div class="form-group">
@@ -72,13 +87,20 @@
               <label class="custom-file-label" for="upload-file">Choose file for pose estimation</label>
             </div>
           </div>
-          <!--<div class="form-group">-->
-            <!--<input class="form-control" type="text" id="giphy-link" aria-describedby="giphy-link-example">-->
-            <!--<small id="giphy-link-example" class="text-muted">-->
-              <!--Insert giphy link to <span class="badge">.mp4</span> file. <br/> For example: <a class="try-link" href="https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4" target="_blank">https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4</a>-->
-            <!--</small>-->
-            <!--<span class="muted-text muted"></span>-->
-          <!--</div>-->
+          <h4 class="or">
+            <span>OR</span>
+          </h4>
+          <div class="form-group">
+            <input class="form-control" type="url" id="giphy-link" aria-describedby="giphy-link-example" placeholder="Insert direct link to picture or video">
+                   <!--pattern="https://media.giphy.com/.*\.mp4"-->
+                   <!--title="The URL must be from giphy.com & ends with .mp4"-->
+
+            <small id="giphy-link-example" class="text-muted">
+              e.g: <a class="try-link" href="https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4" target="_blank">https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4</a>,
+              <a class="try-link" href="https://i.imgur.com/NpPY3oW.mp4" target="_blank">https://i.imgur.com/NpPY3oW.mp4</a>,
+              <a class="try-link" href="https://i.imgur.com/eBFsPUb.mp4" target="_blank">https://i.imgur.com/eBFsPUb.mp4</a>
+            </small>
+          </div>
           <button class="btn btn-lg btn-block btn-primary" type="submit" disabled>Process</button>
         </form>
         <div class="preview" style="display: none">
@@ -88,7 +110,7 @@
               <img id="preview-image" />
             </div>
             <div class="preview-holder" style="display: none">
-              <video id="preview-video" height="400" width="400" controls loop></video>
+              <video id="preview-video" controls loop></video>
             </div>
             <div class="output-holder" style="display: none">
               <canvas id="output"></canvas>

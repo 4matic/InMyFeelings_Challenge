@@ -1,6 +1,4 @@
 const stats = new Stats();
-const CANVAS_SIZE = 400;
-const RESOURCES_NUM = 92;
 
 const isAndroid = () => /Android/i.test(navigator.userAgent);
 const isiOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -8,7 +6,8 @@ const isMobile = () => isAndroid() || isiOS();
 
 let currentElement,
   net,
-  isStopped = true;
+  isStopped = true,
+  canvasWidth, canvasHeight;
 
 const guiState = {
   algorithm: 'single-pose',
@@ -137,10 +136,16 @@ function detectPoseInRealTime(element, net) {
   const canvas = document.getElementById('output');
   const ctx = canvas.getContext('2d');
   const flipHorizontal = true; // since images are being fed from a webcam
-  canvas.width = CANVAS_SIZE;
-  canvas.height = CANVAS_SIZE;
+  canvasWidth = element.clientWidth;
+  canvasHeight = element.clientHeight;
+
+  element.width = canvasWidth;
+  element.height = canvasHeight;
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
 
   async function poseDetectionFrame() {
+    console.log('poseDetectionFrame')
     if (guiState.changeToArchitecture) {
       // Important to purge variables and free up GPU memory
       guiState.net.dispose();
@@ -183,17 +188,17 @@ function detectPoseInRealTime(element, net) {
         break;
     }
 
-    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     if (guiState.output.showVideo) {
       ctx.save();
       ctx.scale(-1, 1);
-      ctx.translate(-CANVAS_SIZE, 0);
-      ctx.drawImage(element, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      ctx.translate(-canvasWidth, 0);
+      ctx.drawImage(element, 0, 0, canvasWidth, canvasHeight);
       ctx.restore();
     }
 
-    const scale = CANVAS_SIZE / element.width;
+    const scale = 1;
 
     // For each pose (i.e. person) detected in an image, loop through the poses
     // and draw the resulting skeleton and keypoints if over certain confidence
@@ -212,7 +217,9 @@ function detectPoseInRealTime(element, net) {
     // End monitoring code for frames per second
     stats.end();
 
-    if(!isStopped) requestAnimationFrame(poseDetectionFrame);
+    if(!isStopped && currentElement.localName === 'video') {
+      requestAnimationFrame(poseDetectionFrame);
+    }
   }
 
   poseDetectionFrame();
@@ -237,30 +244,58 @@ jQuery(document).ready(function($){
 
   $giphyLink.change(async (event) => {
     try {
+      $giphyLink.parent().find('.invalid-feedback').remove();
       event.preventDefault();
       const link = event.target.value;
-      console.log('LINK', link)
-      const file = await downloadFile(link)
-      console.log('file', file);
+      if(link) {
+        const file = await downloadFile(link)
+        const urlCreator = window.URL || window.webkitURL;
+        const fileBlob = urlCreator.createObjectURL(file);
+        showPreview(fileBlob, file.type)
+        $previewContainer.find('.title').text('Preview');
+        $submitForm.find('[type="submit"]').removeAttr('disabled');
+      }
     } catch (err) {
-      console.error(err);
+      $giphyLink.parent().append('<div class="invalid-feedback">Failed to load resource, try another one. See developer console for more details.</div>')
+    }
+  });
+
+  $('.try-link').on('click', (e) => {
+    e.preventDefault();
+    isStopped = true;
+    const href = e.target.href;
+    if(href) {
+      $giphyLink.val(href);
+      $giphyLink.change();
     }
   });
 
   $submitForm.on('submit', (event) => {
     event.preventDefault();
-    console.log('form submit', event);
-    // $previewContainer.hide();
-    $output.parent().show();
+    if(currentElement) {
+      // $previewContainer.hide();
+      $output.parent().show();
 
-    if(currentElement.localName === 'video') {
-      currentElement.play();
+      if (currentElement.localName === 'video') {
+        currentElement.onpause = function() {
+          console.log("The video has been paused");
+        };
+        currentElement.onstalled = function() {
+          console.log("The video has been onstalled");
+        };
+        currentElement.play();
+      }
+      isStopped = false;
+
+      $previewContainer.find('.title').text('Pose estimation');
+
+      currentElement.width = undefined;
+      currentElement.height = undefined;
+
+      detectPoseInRealTime(currentElement, net);
+    } else {
+      $submitForm.prepend('<div class="alert alert-danger">Choose file or specify URL first!</div>')
     }
-    isStopped = false;
-
-    $previewContainer.find('.title').text('Pose estimation');
-
-    detectPoseInRealTime(currentElement, net);
   });
 
   const downloadFile = (link) => {
@@ -270,7 +305,7 @@ jQuery(document).ready(function($){
       xhr.responseType = "blob";
       xhr.onload = (event) => {
         const blob = event.target.response;
-        console.log('event', event)
+        console.log('event.target', event.target)
         resolve(blob);
       };
       xhr.onerror = (event) => {
@@ -281,15 +316,14 @@ jQuery(document).ready(function($){
     });
   };
 
-  const showPreview = (blob, file) => {
-    console.log('file', file)
+  const showPreview = (blob, type) => {
     $previewImage.parent().hide();
     $previewVideo.parent().hide();
-    if(file.type.startsWith("image/")) {
+    if(type.startsWith("image/")) {
       $previewImage.attr('src', blob);
       $previewImage.parent().show();
       currentElement = $previewImage[0];
-    } else if(file.type.startsWith("video/")) {
+    } else if(type.startsWith("video/")) {
       const $source = $previewVideo.find('source');
       if(!$source.length) {
         $('<source/>', {
@@ -309,7 +343,7 @@ jQuery(document).ready(function($){
   const preprocessFile = (file) => {
     const reader = new FileReader();
     reader.addEventListener("load", () => {
-      showPreview(reader.result, file)
+      showPreview(reader.result, file.type)
     }, false);
     if (file) {
       reader.readAsDataURL(file);
