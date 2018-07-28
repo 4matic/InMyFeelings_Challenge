@@ -1,67 +1,139 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 
-<head>
-    <title>PoseNet - Camera Feed Demo</title>
-    <style>
-    .footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        color: black;
-    }
-
-    .footer-text {
-        max-width: 600px;
-        text-align: center;
-        margin: auto;
-    }
-
-    @media only screen and (max-width: 600px) {
-      .footer-text, .dg {
-        display: none;
-      }
-    }
-    </style>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-
-<body>
-    <div id="loading">
-        Loading the model...
-    </div>
-
-    <div id='main' style='display:none'>
-        <video id="video" playsinline style=" -moz-transform: scaleX(-1);
-        -o-transform: scaleX(-1);
-        -webkit-transform: scaleX(-1);
-        transform: scaleX(-1);
-        display: none;
-        ">
-        </video>
-        <canvas id="output" />
-    </div>
-    <div class="footer">
-        <div class="footer-text">
-            <p>
-                PoseNet runs with either a <strong>single-pose</strong> or <strong>multi-pose</strong> detection algorithm. The single person pose detector is faster and more accurate but requires only one subject present in the image.
-                <br>
-                <br> The <strong>output stride</strong> and <strong>image scale factor</strong> have the largest effects on accuracy/speed. A <i>higher</i> output stride results in lower accuracy but higher speed. A <i>higher</i> image scale factor results in higher accuracy but lower speed.
-                <br>
-                <br> This is a Pure Javascript implementation of: <a href="https://github.com/tensorflow/tfjs-models/tree/master/posenet" target="_blank" rel="noopener">PoseNet</a>.
-                <br>
-                <br> Thank you <a href="https://js.tensorflow.org" target="_blank" rel="noopener">TensorFlow.js</a> for your flexible and intuitive APIs.
-            </p>
+  <head>
+      <title>PoseNet - Submit & Process Your Own File</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+      <style>
+        .submit-form {
+          border: 2px solid #ddd;
+          border-radius: .25rem;
+          padding: 1.5rem 1rem;
+          margin: 1rem 0;
+        }
+        .preview {
+          border: 2px solid #ddd;
+          border-radius: .25rem;
+          padding: 1rem 1.5rem 1rem;
+          margin: 1rem 0;
+        }
+        .preview > div {
+          display: flex;
+        }
+        .preview > div > * {
+          width: 33%;
+          margin: 0 auto;
+          display: block;
+          border: 1px solid red;
+        }
+        body.mobile .close-button.close-top {
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.2rem;
+        }
+        .dg.ac {
+          z-index: 3!important;
+        }
+        .preview-holder,
+        .output-holder {
+          overflow: hidden;
+        }
+        #preview-image,
+        #preview-video,
+        #output {
+          object-fit: cover;
+          width: 100%;
+          height: 100%;
+        }
+        .preview .title {
+          text-align: center;
+        }
+      </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="jumbotron mt-3">
+        <h1>PoseNet - Submit & Process Your Own File</h1>
+        <p class="lead">
+          This is the code for this <a href="https://youtu.be/prswDGGmYaE" target="_blank">this</a> video on Youtube by Siraj Raval as part of the <a href="https://www.google.com/search?q=InMyFeelingsChallenge" target="_blank">#InMyFeelingsChallenge</a> dance competition.
+          <br />
+          In this demo you can process both pictures and video.
+          <br/>
+          I used <span class="badge">.mp4</span> files downloaded from <a href="https://giphy.com/">Giphy.com</a>.
+        </p>
+        <form class="submit-form">
+          <div class="form-group">
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="upload-file" accept="video/*, image/*">
+              <label class="custom-file-label" for="upload-file">Choose file for pose estimation</label>
+            </div>
+          </div>
+          <!--<div class="form-group">-->
+            <!--<input class="form-control" type="text" id="giphy-link" aria-describedby="giphy-link-example">-->
+            <!--<small id="giphy-link-example" class="text-muted">-->
+              <!--Insert giphy link to <span class="badge">.mp4</span> file. <br/> For example: <a class="try-link" href="https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4" target="_blank">https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4</a>-->
+            <!--</small>-->
+            <!--<span class="muted-text muted"></span>-->
+          <!--</div>-->
+          <button class="btn btn-lg btn-block btn-primary" type="submit" disabled>Process</button>
+        </form>
+        <div class="preview" style="display: none">
+          <h5 class="title">Preview</h5>
+          <div>
+            <div class="preview-holder" style="display: none">
+              <img id="preview-image" />
+            </div>
+            <div class="preview-holder" style="display: none">
+              <video id="preview-video" height="400" width="400" controls loop></video>
+            </div>
+            <div class="output-holder" style="display: none">
+              <canvas id="output"></canvas>
+            </div>
+          </div>
         </div>
+        <p>
+          PoseNet runs with either a <strong>single-pose</strong> or <strong>multi-pose</strong> detection algorithm. The single person pose detector is faster and more accurate but requires only one subject present in the image.
+          <br>
+          <br> The <strong>output stride</strong> and <strong>image scale factor</strong> have the largest effects on accuracy/speed. A <i>higher</i> output stride results in lower accuracy but higher speed. A <i>higher</i> image scale factor results in higher accuracy but lower speed.
+          <br>
+          <br> This is a Pure Javascript implementation of: <a href="https://github.com/tensorflow/tfjs-models/tree/master/posenet" target="_blank" rel="noopener">PoseNet</a>.
+          <br>
+          <br> Thank you <a href="https://js.tensorflow.org" target="_blank" rel="noopener">TensorFlow.js</a> for your flexible and intuitive APIs.
+        </p>
+      </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.2/build/dat.gui.js"></script>
-    <script src="https://unpkg.com/@tensorflow/tfjs"></script>
-    <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
-    
-    <script src="demo_util.js"></script>
-    <script src="stats.min.js "></script>
-    <script src="camera.js"></script>
-</body>
 
+      <!--<div id="loading">-->
+          <!--Loading the model...-->
+      <!--</div>-->
+
+      <!--<div id='main'>-->
+        <!--<video-->
+          <!--id="video"-->
+          <!--poster="https://media.giphy.com/media/JJGUejl0pLcRy/200_s.gif"-->
+          <!--style="margin:0;padding:0"-->
+          <!--width="200"-->
+          <!--height="164"-->
+          <!--loop>-->
+            <!--<source src="./video4.mp4" type="video/mp4" />-->
+            <!--Your browser does not support the mp4 video codec.-->
+        <!--</video>-->
+        <!--<canvas id="output" />-->
+      <!--</div>-->
+      <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.2/build/dat.gui.js"></script>
+      <script src="https://unpkg.com/@tensorflow/tfjs"></script>
+      <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
+
+      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+      <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>-->
+      <!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>-->
+
+      <script src="demo_util.js"></script>
+      <script src="stats.min.js "></script>
+      <script src="main.js"></script>
+  </body>
 </html>

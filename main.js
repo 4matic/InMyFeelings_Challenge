@@ -1,78 +1,14 @@
-/**
- * @license
- * Copyright 2018 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licnses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================================
- */
-// import dat from 'dat.gui';
-// import Stats from 'stats.js';
-// import * as posenet from '../src';
-
-// import { drawKeypoints, drawSkeleton } from './demo_util';
-const maxVideoSize = 513;
-const canvasSize = 400;
 const stats = new Stats();
+const CANVAS_SIZE = 400;
+const RESOURCES_NUM = 92;
 
-function isAndroid() {
-  return /Android/i.test(navigator.userAgent);
-}
+const isAndroid = () => /Android/i.test(navigator.userAgent);
+const isiOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isMobile = () => isAndroid() || isiOS();
 
-function isiOS() {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
-function isMobile() {
-  return isAndroid() || isiOS();
-}
-
-/**
- * Loads a the camera to be used in the demo
- *
- */
-async function setupCamera() {
-  const video = document.getElementById('video');
-  video.width = maxVideoSize;
-  video.height = maxVideoSize;
-
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    const mobile = isMobile();
-    const stream = await navigator.mediaDevices.getUserMedia({
-      'audio': false,
-      'video': {
-        facingMode: 'user',
-        width: mobile ? undefined : maxVideoSize,
-        height: mobile ? undefined: maxVideoSize}
-    });
-    video.srcObject = stream;
-
-    return new Promise(resolve => {
-      video.onloadedmetadata = () => {
-        resolve(video);
-      };
-    });
-  } else {
-    const errorMessage = "This browser does not support video capture, or this device does not have a camera";
-    alert(errorMessage);
-    return Promise.reject(errorMessage);
-  }
-}
-
-async function loadVideo() {
-  const video = await setupCamera();
-  video.play();
-
-  return video;
-}
+let currentElement,
+  net,
+  isStopped = true;
 
 const guiState = {
   algorithm: 'single-pose',
@@ -102,7 +38,7 @@ const guiState = {
 /**
  * Sets up dat.gui controller on the top-right of the window
  */
-function setupGui(cameras, net) {
+const setupGui = (cameras, net) => {
   guiState.net = net;
 
   if (cameras.length > 0) {
@@ -114,7 +50,11 @@ function setupGui(cameras, net) {
     return result;
   }, {});
 
-  const gui = new dat.GUI({ width: 300 });
+  const gui = new dat.GUI({
+    width: isMobile() ? 200: 300,
+    closeOnTop: isMobile(),
+    closed: isMobile(),
+  });
 
   // The single-pose algorithm is faster and simpler but requires only one person to be
   // in the frame or results will be innaccurate. Multi-pose works for more than 1 person
@@ -159,6 +99,9 @@ function setupGui(cameras, net) {
   output.add(guiState.output, 'showPoints');
   output.open();
 
+  if(isMobile()) {
+    gui.close();
+  }
 
   architectureController.onChange(function (architecture) {
     guiState.changeToArchitecture = architecture;
@@ -176,27 +119,26 @@ function setupGui(cameras, net) {
         break;
     }
   });
-}
+};
 
 /**
  * Sets up a frames per second panel on the top-left of the window
  */
-function setupFPS() {
+const setupFPS = () => {
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
   document.body.appendChild(stats.dom);
-}
+};
 
 /**
  * Feeds an image to posenet to estimate poses - this is where the magic happens.
  * This function loops with a requestAnimationFrame method.
  */
-function detectPoseInRealTime(video, net) {
+function detectPoseInRealTime(element, net) {
   const canvas = document.getElementById('output');
   const ctx = canvas.getContext('2d');
   const flipHorizontal = true; // since images are being fed from a webcam
-
-  canvas.width = canvasSize;
-  canvas.height = canvasSize;
+  canvas.width = CANVAS_SIZE;
+  canvas.height = CANVAS_SIZE;
 
   async function poseDetectionFrame() {
     if (guiState.changeToArchitecture) {
@@ -222,7 +164,7 @@ function detectPoseInRealTime(video, net) {
     let minPartConfidence;
     switch (guiState.algorithm) {
       case 'single-pose':
-        const pose = await guiState.net.estimateSinglePose(video, imageScaleFactor, flipHorizontal, outputStride);
+        const pose = await guiState.net.estimateSinglePose(element, imageScaleFactor, flipHorizontal, outputStride);
         poses.push(pose);
 
         minPoseConfidence = Number(
@@ -231,7 +173,7 @@ function detectPoseInRealTime(video, net) {
           guiState.singlePoseDetection.minPartConfidence);
         break;
       case 'multi-pose':
-        poses = await guiState.net.estimateMultiplePoses(video, imageScaleFactor, flipHorizontal, outputStride,
+        poses = await guiState.net.estimateMultiplePoses(element, imageScaleFactor, flipHorizontal, outputStride,
           guiState.multiPoseDetection.maxPoseDetections,
           guiState.multiPoseDetection.minPartConfidence,
           guiState.multiPoseDetection.nmsRadius);
@@ -241,17 +183,17 @@ function detectPoseInRealTime(video, net) {
         break;
     }
 
-    ctx.clearRect(0, 0, canvasSize, canvasSize);
+    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
     if (guiState.output.showVideo) {
       ctx.save();
       ctx.scale(-1, 1);
-      ctx.translate(-canvasSize, 0);
-      ctx.drawImage(video, 0, 0, canvasSize, canvasSize);
+      ctx.translate(-CANVAS_SIZE, 0);
+      ctx.drawImage(element, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
       ctx.restore();
     }
 
-    const scale = canvasSize / video.width;
+    const scale = CANVAS_SIZE / element.width;
 
     // For each pose (i.e. person) detected in an image, loop through the poses
     // and draw the resulting skeleton and keypoints if over certain confidence
@@ -270,38 +212,119 @@ function detectPoseInRealTime(video, net) {
     // End monitoring code for frames per second
     stats.end();
 
-    requestAnimationFrame(poseDetectionFrame);
+    if(!isStopped) requestAnimationFrame(poseDetectionFrame);
   }
 
   poseDetectionFrame();
 }
 
-/**
- * Kicks off the demo by loading the posenet model, finding and loading available
- * camera devices, and setting off the detectPoseInRealTime function.
- */
-async function bindPage() {
-  // Load the PoseNet model weights for version 1.01
-  const net = await posenet.load();
+jQuery(document).ready(function($){
+  const $fileInput = $('#upload-file');
+  const $giphyLink = $('#giphy-link');
+  const $previewImage = $('#preview-image');
+  const $previewVideo = $('#preview-video');
+  const $submitForm = $('.submit-form');
+  const $previewContainer = $('.preview');
+  const $output = $('#output');
 
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('main').style.display = 'block';
+  $fileInput.change((event) => {
+    event.preventDefault();
+    const file = event.target.files[0];
+    preprocessFile(file);
+    $previewContainer.find('.title').text('Preview');
+    $submitForm.find('[type="submit"]').removeAttr('disabled')
+  });
 
-  let video;
+  $giphyLink.change(async (event) => {
+    try {
+      event.preventDefault();
+      const link = event.target.value;
+      console.log('LINK', link)
+      const file = await downloadFile(link)
+      console.log('file', file);
+    } catch (err) {
+      console.error(err);
+    }
+  });
 
-  try {
-    video = await loadVideo();
-  } catch(e) {
-    console.error(e);
-    return;
-  }
+  $submitForm.on('submit', (event) => {
+    event.preventDefault();
+    console.log('form submit', event);
+    // $previewContainer.hide();
+    $output.parent().show();
 
-  setupGui([], net);
-  setupFPS();
-  detectPoseInRealTime(video, net);
-}
+    if(currentElement.localName === 'video') {
+      currentElement.play();
+    }
+    isStopped = false;
 
-navigator.getUserMedia = navigator.getUserMedia ||
-  navigator.webkitGetUserMedia ||
-  navigator.mozGetUserMedia;
-bindPage(); // kick off the demo
+    $previewContainer.find('.title').text('Pose estimation');
+
+    detectPoseInRealTime(currentElement, net);
+  });
+
+  const downloadFile = (link) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", link);
+      xhr.responseType = "blob";
+      xhr.onload = (event) => {
+        const blob = event.target.response;
+        console.log('event', event)
+        resolve(blob);
+      };
+      xhr.onerror = (event) => {
+        console.error('event', event)
+        reject(event);
+      };
+      xhr.send();
+    });
+  };
+
+  const showPreview = (blob, file) => {
+    console.log('file', file)
+    $previewImage.parent().hide();
+    $previewVideo.parent().hide();
+    if(file.type.startsWith("image/")) {
+      $previewImage.attr('src', blob);
+      $previewImage.parent().show();
+      currentElement = $previewImage[0];
+    } else if(file.type.startsWith("video/")) {
+      const $source = $previewVideo.find('source');
+      if(!$source.length) {
+        $('<source/>', {
+          src: blob,
+        }).appendTo($previewVideo);
+      } else {
+        $previewVideo[0].pause();
+        $source.attr('src', blob);
+        $previewVideo[0].load();
+      }
+      currentElement = $previewVideo[0];
+      $previewVideo.parent().show();
+    }
+    $previewContainer.show();
+  };
+
+  const preprocessFile = (file) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      showPreview(reader.result, file)
+    }, false);
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  };
+  const setup = async () => {
+    if(isMobile()) {
+      $('body').addClass('mobile');
+    }
+    // Load the PoseNet model weights for version 1.01
+    net = await posenet.load();
+    setupGui([], net);
+    setupFPS();
+  };
+  setup();
+});
+
+
