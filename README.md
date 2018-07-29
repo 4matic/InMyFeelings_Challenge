@@ -2,6 +2,8 @@
 This fork has become a tool for pose estimation.
 I did this in order to always have the opportunity to evaluate pose estimation on a single web page using images or videos.
 
+**Added support for WebM video download with pose estimation skeleton.**
+
 ## Coding Challenge - Due Date, August 1 2018 at 12 PM PST
 
 This is the code for this [this](https://youtu.be/prswDGGmYaE) video on Youtube by Siraj Raval as part of the #InMyFeelingsChallenge dance competition. The challenge is to create your own AI to dance to this song and submit it via Twitter, Facebook, Youtube, Instagram, or LinkedIn (or all of them) using the #InMyFeelingsChallenge hashtag. There are 3 methods to do this

@@ -75,9 +75,11 @@
         <p class="lead">
           This is the code for this <a href="https://youtu.be/prswDGGmYaE" target="_blank">this</a> video on Youtube by Siraj Raval as part of the <a href="https://www.google.com/search?q=InMyFeelingsChallenge" target="_blank">#InMyFeelingsChallenge</a> dance competition.
           <br />
-          In this demo you can process both pictures and video.
+          In this demo you can process both picture and video.
           <br/>
-          I used <span class="badge">.mp4</span> files downloaded from <a href="https://giphy.com/">Giphy.com</a>.<br />
+          I used <span class="badge">.mp4</span> files downloaded from <a href="https://giphy.com/">Giphy.com</a>.
+          <br/>
+          You can download WebM video of pose estimation after process.<br />
           <i class="text-muted">Sometimes it may happen that the video may pause without actual pausing(bug?lag?). If this happened just use the video rewind.</i>
         </p>
         <form class="submit-form">
@@ -96,12 +98,19 @@
                    <!--title="The URL must be from giphy.com & ends with .mp4"-->
 
             <small id="giphy-link-example" class="text-muted">
-              e.g: <a class="try-link" href="https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4" target="_blank">https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4</a>,
-              <a class="try-link" href="https://i.imgur.com/NpPY3oW.mp4" target="_blank">https://i.imgur.com/NpPY3oW.mp4</a>,
-              <a class="try-link" href="https://i.imgur.com/eBFsPUb.mp4" target="_blank">https://i.imgur.com/eBFsPUb.mp4</a>
+              e.g: <a class="try-link" href="https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4" data-pose="single">https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4</a>,
+              <a class="try-link" href="https://i.imgur.com/NpPY3oW.mp4" data-pose="single">https://i.imgur.com/NpPY3oW.mp4</a>,
+              <a class="try-link" href="https://i.imgur.com/eBFsPUb.mp4" data-pose="multi">https://i.imgur.com/eBFsPUb.mp4</a>
             </small>
           </div>
           <button class="btn btn-lg btn-block btn-primary" type="submit" disabled>Process</button>
+          <div class="btn-group" role="group">
+            <button id="download-btn" type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Download WebM Video</button>
+            <div class="dropdown-menu" aria-labelledby="download-btn">
+              <a class="download-skeleton dropdown-item" href="#">Only skeleton</a>
+              <a class="download-skeleton-original dropdown-item" href="#">Skeleton + Original</a>
+            </div>
+          </div>
         </form>
         <div class="preview" style="display: none">
           <h5 class="title">Preview</h5>
@@ -149,10 +158,11 @@
       <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.2/build/dat.gui.js"></script>
       <script src="https://unpkg.com/@tensorflow/tfjs"></script>
       <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
+      <script src="https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
 
       <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-      <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>-->
-      <!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
       <script src="demo_util.js"></script>
       <script src="stats.min.js "></script>

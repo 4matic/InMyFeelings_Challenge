@@ -9,6 +9,31 @@ let currentElement,
   isStopped = true,
   canvasWidth, canvasHeight;
 
+const mediaSource = new MediaSource();
+mediaSource.addEventListener('sourceopen', handleSourceOpen, false);
+
+function handleSourceOpen(event) {
+  console.log('MediaSource opened');
+  sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+  console.log('Source buffer: ', sourceBuffer);
+}
+
+function handleDataAvailable(event) {
+  if (event.data && event.data.size > 0) {
+    recordedBlobs.push(event.data);
+  }
+}
+
+function handleStop(event) {
+  console.log('Recorder stopped: ', event);
+  const superBuffer = new Blob(recordedBlobs, {type: 'video/webm'});
+  // video.src = window.URL.createObjectURL(superBuffer);
+}
+
+let mediaRecorder;
+let recordedBlobs;
+let sourceBuffer;
+
 const guiState = {
   algorithm: 'single-pose',
   input: {
@@ -58,7 +83,7 @@ const setupGui = (cameras, net) => {
   // The single-pose algorithm is faster and simpler but requires only one person to be
   // in the frame or results will be innaccurate. Multi-pose works for more than 1 person
   const algorithmController = gui.add(
-    guiState, 'algorithm', ['single-pose', 'multi-pose']);
+    guiState, 'algorithm', ['single-pose', 'multi-pose']).listen();
 
   // The input parameters have the most effect on accuracy and speed of the network
   let input = gui.addFolder('Input');
@@ -93,8 +118,8 @@ const setupGui = (cameras, net) => {
   multi.add(guiState.multiPoseDetection, 'nmsRadius').min(0.0).max(40.0);
 
   let output = gui.addFolder('Output');
-  output.add(guiState.output, 'showVideo');
-  output.add(guiState.output, 'showSkeleton');
+  output.add(guiState.output, 'showVideo').listen();
+  output.add(guiState.output, 'showSkeleton').listen();
   output.add(guiState.output, 'showPoints');
   output.open();
 
@@ -128,6 +153,21 @@ const setupFPS = () => {
   document.body.appendChild(stats.dom);
 };
 
+const downloadVideo = () => {
+  const blob = new Blob(recordedBlobs, {type: 'video/webm'});
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = 'test.webm';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }, 100);
+};
+
 /**
  * Feeds an image to posenet to estimate poses - this is where the magic happens.
  * This function loops with a requestAnimationFrame method.
@@ -145,7 +185,6 @@ function detectPoseInRealTime(element, net) {
   canvas.height = canvasHeight;
 
   async function poseDetectionFrame() {
-    console.log('poseDetectionFrame')
     if (guiState.changeToArchitecture) {
       // Important to purge variables and free up GPU memory
       guiState.net.dispose();
@@ -225,6 +264,46 @@ function detectPoseInRealTime(element, net) {
   poseDetectionFrame();
 }
 
+const stopRecording = () => {
+  mediaRecorder.stop();
+  console.log('Recorded Blobs: ', recordedBlobs);
+  // video.controls = true;
+};
+
+const startRecording = () => {
+  let options = {mimeType: 'video/webm'};
+  recordedBlobs = [];
+  try {
+    mediaRecorder = new MediaRecorder(stream, options);
+  } catch (e0) {
+    console.log('Unable to create MediaRecorder with options Object: ', e0);
+    try {
+      options = {mimeType: 'video/webm,codecs=vp9'};
+      mediaRecorder = new MediaRecorder(stream, options);
+    } catch (e1) {
+      console.log('Unable to create MediaRecorder with options Object: ', e1);
+      try {
+        options = 'video/vp8'; // Chrome 47
+        mediaRecorder = new MediaRecorder(stream, options);
+      } catch (e2) {
+        alert('MediaRecorder is not supported by this browser.\n\n' +
+          'Try Firefox 29 or later, or Chrome 47 or later, ' +
+          'with Enable experimental Web Platform features enabled from chrome://flags.');
+        console.error('Exception while creating MediaRecorder:', e2);
+        return;
+      }
+    }
+  }
+  console.log('Created MediaRecorder', mediaRecorder, 'with options', options);
+  // recordButton.textContent = 'Stop Recording';
+  // playButton.disabled = true;
+  // downloadButton.disabled = true;
+  mediaRecorder.onstop = handleStop;
+  mediaRecorder.ondataavailable = handleDataAvailable;
+  mediaRecorder.start(100); // collect 100ms of data
+  console.log('MediaRecorder started', mediaRecorder);
+};
+
 jQuery(document).ready(function($){
   const $fileInput = $('#upload-file');
   const $giphyLink = $('#giphy-link');
@@ -260,13 +339,52 @@ jQuery(document).ready(function($){
     }
   });
 
+  const playAndDownloadVideo = (type) => {
+    if(type === 'skeleton') {
+      guiState.output.showVideo = false;
+      guiState.output.showSkeleton = true;
+    } else if(type === 'skeleton-original') {
+      guiState.output.showVideo = true;
+      guiState.output.showSkeleton = true;
+    }
+    $previewVideo.removeAttr('loop');
+    const video = $previewVideo[0];
+    video.pause();
+    video.load();
+    video.oncanplaythrough = () => {
+      $previewVideo[0].play();
+      const canvas = document.getElementById('output');
+      stream = canvas.captureStream(); // frames per second
+      console.log('Started stream capture from canvas element: ', stream);
+      startRecording();
+      video.oncanplaythrough = null;
+    };
+    video.onended = () => {
+      stopRecording();
+      downloadVideo();
+      video.onended = null;
+    };
+  };
+
+  $('.download-skeleton').on('click', (e) => {
+    e.preventDefault();
+    playAndDownloadVideo('skeleton');
+  });
+  $('.download-skeleton-original').on('click', (e) => {
+    e.preventDefault();
+    playAndDownloadVideo('skeleton-original');
+  });
   $('.try-link').on('click', (e) => {
     e.preventDefault();
     isStopped = true;
-    const href = e.target.href;
+    const el = e.target;
+    const href = el.href;
     if(href) {
       $giphyLink.val(href);
       $giphyLink.change();
+      if(el.dataset && el.dataset.pose) {
+        guiState.algorithm = `${el.dataset.pose}-pose`
+      }
     }
   });
 
