@@ -103,10 +103,12 @@
       <div class="jumbotron mt-3">
         <h1>PoseNet - Submit & Process Your Own File</h1>
         <p class="lead">
-          This is the code for this <a href="https://youtu.be/prswDGGmYaE" target="_blank">this</a> video on Youtube by Siraj Raval as part of the <a href="https://www.google.com/search?q=InMyFeelingsChallenge" target="_blank">#InMyFeelingsChallenge</a> dance competition. The challenge is to create your own AI to dance to this song and submit it via Twitter, Facebook, Youtube, Instagram, or LinkedIn (or all of them) using the #InMyFeelingsChallenge hashtag.
+          This is the code for this <a href="https://youtu.be/prswDGGmYaE" target="_blank">this</a> video on Youtube by Siraj Raval as part of the <a href="https://www.google.com/search?q=InMyFeelingsChallenge" target="_blank">#InMyFeelingsChallenge</a> dance competition. The challenge is to create your own AI to dance to this song and submit it via Twitter, Facebook, Youtube, Instagram, or LinkedIn (or all of them) using the <code>#InMyFeelingsChallenge</code> hashtag.
         </p>
         <p>
-          In this demo you can process both picture and video. I used <span class="badge">.mp4</span> files downloaded from <a href="https://giphy.com/" target="_blank">Giphy.com</a>.
+          Page load size is about <span class="badge badge-warning">~ 13.5 MB</span> so be patient and wait for the full page load.
+          <br />
+          In this demo you can process both picture and video. I used <span class="badge badge-success">.mp4</span> files downloaded from <a href="https://giphy.com/" target="_blank">Giphy.com</a>.
           <br/>
           You can download WebM video of pose estimation after process. It uses <a href="https://caniuse.com/#search=captureStream" target="_blank">captureStream method</a>, so some browsers can't do that.<br />
         </p>
@@ -124,7 +126,10 @@
           <div class="form-group">
             <input class="form-control" type="url" id="giphy-link" aria-describedby="giphy-link-example" placeholder="Insert direct link to picture or video">
             <small id="giphy-link-example" class="text-muted">
-              e.g: <a class="try-link" href="https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4" data-pose="single">https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4</a>,
+              <div style="text-align: center">
+                Just click on links below to try:
+              </div>
+              <a class="try-link" href="https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4" data-pose="single">https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4</a>,
               <a class="try-link" href="https://i.imgur.com/NpPY3oW.mp4" data-pose="single">https://i.imgur.com/NpPY3oW.mp4</a>,
               <a class="try-link" href="https://i.imgur.com/eBFsPUb.mp4" data-pose="multi">https://i.imgur.com/eBFsPUb.mp4</a>,
               <a class="try-link" href="https://i.imgur.com/WOJtl3X.mp4" data-pose="multi">https://i.imgur.com/WOJtl3X.mp4</a>
@@ -168,13 +173,12 @@
           <br>
           <br> Thank you <a href="https://js.tensorflow.org" target="_blank" rel="noopener">TensorFlow.js</a> for your flexible and intuitive APIs.
         </p>
-        <p class="text-muted created-by">Created by Maxim Maximov in 2018</p>
+        <p class="text-muted created-by">Created by Maxim Maximov in 2018 |&nbsp;<a href="https://github.com/4matic/InMyFeelings_Challenge" target="_blank">Github Repo</a></p>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.2/build/dat.gui.js"></script>
     <script src="https://unpkg.com/@tensorflow/tfjs"></script>
     <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
