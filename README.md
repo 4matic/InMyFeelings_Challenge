@@ -1,13 +1,16 @@
 # Pose estimation tool
-This fork has become a tool for pose estimation.
+This fork has become a tool for pose estimation. [Check this out!](https://4matic.github.io/InMyFeelings_Challenge/)
 I did this in order to always have the opportunity to evaluate pose estimation on a single web page using images or videos.
 
 **Added support for WebM video download with pose estimation skeleton.** It uses [captureStream method](https://caniuse.com/#search=captureStream), in the form of a MediaStream.
 
-## My results
-![3 People dance](https://github.com/4matic/InMyFeelings_Challenge/raw/master/videos/3-people.gif)
-![Female](https://github.com/4matic/InMyFeelings_Challenge/raw/master/videos/one-person-female.gif)
-![Male](https://github.com/4matic/InMyFeelings_Challenge/raw/master/videos/one-person-male.gif)
+## Results
+
+Name | Image | Original
+--- | --- | ---
+`3 People dance` | ![3 People dance](https://github.com/4matic/InMyFeelings_Challenge/raw/master/videos/3-people.gif) | https://imgur.com/gallery/WOJtl3X
+`Female dance` | ![Female](https://github.com/4matic/InMyFeelings_Challenge/raw/master/videos/one-person-female.gif) | https://imgur.com/gallery/KX3IiHs
+`Male dance` | ![Male](https://github.com/4matic/InMyFeelings_Challenge/raw/master/videos/one-person-male.gif) | https://giphy.com/gifs/j3gsT2RsH9K0w
 
 ## Coding Challenge - Due Date, August 1 2018 at 12 PM PST
 
@@ -38,7 +41,8 @@ I'll definitely give a social media shoutout to some of the best submissions! Go
 
 Run real-time pose estimation in the browser using TensorFlow.js.
 
-[Try it here!](https://montrealai.github.io/posenet-v3/)
+[Try original here!](https://montrealai.github.io/posenet-v3/)  
+[Try forked version here!](https://4matic.github.io/InMyFeelings_Challenge/)
 
 <img src="https://raw.githubusercontent.com/irealva/tfjs-models/master/posenet/demos/camera.gif" alt="cameraDemo" style="width: 600px;"/>
 
