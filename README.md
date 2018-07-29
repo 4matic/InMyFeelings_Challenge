@@ -4,6 +4,11 @@ I did this in order to always have the opportunity to evaluate pose estimation o
 
 **Added support for WebM video download with pose estimation skeleton.** It uses [captureStream method](https://caniuse.com/#search=captureStream), in the form of a MediaStream.
 
+## My results
+![3 People dance](https://github.com/4matic/InMyFeelings_Challenge/raw/master/videos/3-people.gif)
+![Female](https://github.com/4matic/InMyFeelings_Challenge/raw/master/videos/one-person-female.gif)
+![Male](https://github.com/4matic/InMyFeelings_Challenge/raw/master/videos/one-person-male.gif)
+
 ## Coding Challenge - Due Date, August 1 2018 at 12 PM PST
 
 This is the code for this [this](https://youtu.be/prswDGGmYaE) video on Youtube by Siraj Raval as part of the #InMyFeelingsChallenge dance competition. The challenge is to create your own AI to dance to this song and submit it via Twitter, Facebook, Youtube, Instagram, or LinkedIn (or all of them) using the #InMyFeelingsChallenge hashtag. There are 3 methods to do this
