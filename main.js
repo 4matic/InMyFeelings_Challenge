@@ -7,7 +7,7 @@ const isMobile = () => isAndroid() || isiOS();
 let currentElement,
   net,
   isStopped = true,
-  canvasWidth, canvasHeight, color = '#00ffff';
+  canvasWidth, canvasHeight, color = '#00ffff', multiTrigger, singleTrigger;
 
 const mediaSource = new MediaSource();
 mediaSource.addEventListener('sourceopen', handleSourceOpen, false);
@@ -103,19 +103,19 @@ const setupGui = (cameras, net) => {
   // pose (i.e. a person detected in a frame)
   // Min part confidence: the confidence that a particular estimated keypoint
   // position is accurate (i.e. the elbow's position)
-  let single = gui.addFolder('Single Pose Detection');
-  single.add(guiState.singlePoseDetection, 'minPoseConfidence', 0.0, 1.0);
-  single.add(guiState.singlePoseDetection, 'minPartConfidence', 0.0, 1.0);
-  single.open();
+  singleTrigger = gui.addFolder('Single Pose Detection');
+  singleTrigger.add(guiState.singlePoseDetection, 'minPoseConfidence', 0.0, 1.0);
+  singleTrigger.add(guiState.singlePoseDetection, 'minPartConfidence', 0.0, 1.0);
+  singleTrigger.open();
 
-  let multi = gui.addFolder('Multi Pose Detection');
-  multi.add(
-    guiState.multiPoseDetection, 'maxPoseDetections').min(1).max(20).step(1);
-  multi.add(guiState.multiPoseDetection, 'minPoseConfidence', 0.0, 1.0);
-  multi.add(guiState.multiPoseDetection, 'minPartConfidence', 0.0, 1.0);
+  multiTrigger = gui.addFolder('Multi Pose Detection');
+  multiTrigger.add(
+    guiState.multiPoseDetection, 'maxPoseDetections').min(1).max(20).step(1).listen();
+  multiTrigger.add(guiState.multiPoseDetection, 'minPoseConfidence', 0.0, 1.0);
+  multiTrigger.add(guiState.multiPoseDetection, 'minPartConfidence', 0.0, 1.0);
   // nms Radius: controls the minimum distance between poses that are returned
   // defaults to 20, which is probably fine for most use cases
-  multi.add(guiState.multiPoseDetection, 'nmsRadius').min(0.0).max(40.0);
+  multiTrigger.add(guiState.multiPoseDetection, 'nmsRadius').min(0.0).max(40.0);
 
   let output = gui.addFolder('Output');
   output.add(guiState.output, 'showVideo').listen();
@@ -134,12 +134,12 @@ const setupGui = (cameras, net) => {
   algorithmController.onChange(function (value) {
     switch (guiState.algorithm) {
       case 'single-pose':
-        multi.close();
-        single.open();
+        multiTrigger.close();
+        singleTrigger.open();
         break;
       case 'multi-pose':
-        single.close();
-        multi.open();
+        singleTrigger.close();
+        multiTrigger.open();
         break;
     }
   });
@@ -377,11 +377,11 @@ jQuery(document).ready(function($){
 
   $('.download-skeleton').on('click', (e) => {
     e.preventDefault();
-    playAndDownloadVideo('skeleton', 'pose-estimation-skeleton');
+    playAndDownloadVideo('skeleton', 'pose-estimation-skeleton' + (guiState.algorithm === 'multi-pose' ? '-multi' : ''));
   });
   $('.download-skeleton-original').on('click', (e) => {
     e.preventDefault();
-    playAndDownloadVideo('skeleton-original', 'pose-estimation');
+    playAndDownloadVideo('skeleton-original', 'pose-estimation' + (guiState.algorithm === 'multi-pose' ? '-multi' : ''));
   });
   $('.try-link').on('click', (e) => {
     e.preventDefault();
@@ -393,6 +393,14 @@ jQuery(document).ready(function($){
       $giphyLink.change();
       if(el.dataset && el.dataset.pose) {
         guiState.algorithm = `${el.dataset.pose}-pose`
+        if(el.dataset.pose === 'multi') {
+          guiState.multiPoseDetection.maxPoseDetections = 3;
+          multiTrigger.open();
+          singleTrigger.close();
+        } else {
+          multiTrigger.close();
+          singleTrigger.open();
+        }
       }
     }
   });
