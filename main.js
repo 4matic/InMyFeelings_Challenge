@@ -320,7 +320,6 @@ jQuery(document).ready(function($){
     const file = event.target.files[0];
     preprocessFile(file);
     $previewContainer.find('.title').text('Preview');
-    $submitForm.find('[type="submit"]').removeAttr('disabled');
     $giphyLink.parent().find('.invalid-feedback').remove();
   });
 
@@ -339,9 +338,15 @@ jQuery(document).ready(function($){
         const file = await downloadFile(link)
         const urlCreator = window.URL || window.webkitURL;
         const fileBlob = urlCreator.createObjectURL(file);
-        showPreview(fileBlob, file.type)
         $previewContainer.find('.title').text('Preview');
-        $submitForm.find('[type="submit"]').removeAttr('disabled');
+        try {
+          const resource = await showPreview(fileBlob, file.type);
+          $submitForm.find('[type="submit"]').removeAttr('disabled');
+          $previewContainer.show();
+        } catch(err) {
+          console.error(err);
+          $submitForm.find('[type="submit"]').attr('disabled', true);
+        }
       }
     } catch (err) {
       $giphyLink.parent().append('<div class="invalid-feedback">Failed to load resource, try another one. See developer console for more details.</div>')
@@ -385,12 +390,13 @@ jQuery(document).ready(function($){
   });
   $('.try-link').on('click', (e) => {
     e.preventDefault();
-    isStopped = true;
     const el = e.target;
     const href = el.href;
     if(href) {
+      isStopped = true;
       $giphyLink.val(href);
       $giphyLink.change();
+      $submitForm.find('[type="submit"]').attr('disabled', true);
       if(el.dataset && el.dataset.pose) {
         guiState.algorithm = `${el.dataset.pose}-pose`
         if(el.dataset.pose === 'multi') {
@@ -419,6 +425,9 @@ jQuery(document).ready(function($){
           console.log("The video has been onstalled");
         };
         currentElement.play();
+        setTimeout(() => {
+          $('#download-btn').removeAttr('disabled');
+        }, 300)
       }
       isStopped = false;
 
@@ -426,7 +435,6 @@ jQuery(document).ready(function($){
 
       currentElement.width = undefined;
       currentElement.height = undefined;
-      $('#download-btn').removeAttr('disabled');
       detectPoseInRealTime(currentElement, net);
     } else {
       $submitForm.prepend('<div class="alert alert-danger">Choose file or specify URL first!</div>')
@@ -452,33 +460,69 @@ jQuery(document).ready(function($){
   };
 
   const showPreview = (blob, type) => {
-    $previewImage.parent().hide();
-    $previewVideo.parent().hide();
-    if(type.startsWith("image/")) {
-      $previewImage.attr('src', blob);
-      $previewImage.parent().show();
-      currentElement = $previewImage[0];
-    } else if(type.startsWith("video/")) {
-      const $source = $previewVideo.find('source');
-      if(!$source.length) {
-        $('<source/>', {
-          src: blob,
-        }).appendTo($previewVideo);
-      } else {
-        $previewVideo[0].pause();
-        $source.attr('src', blob);
-        $previewVideo[0].load();
+    return new Promise((resolve, reject) => {
+      $previewImage.parent().hide();
+      $previewVideo.parent().hide();
+      if(type.startsWith("image/")) {
+        $previewImage.attr('src', blob);
+        $previewImage.parent().show();
+        currentElement = $previewImage[0];
+        // $previewContainer.show();
+        resolve(currentElement);
+      } else if(type.startsWith("video/")) {
+        const $source = $previewVideo.find('source');
+        const video = $previewVideo[0];
+        video.oncanplay = () =>  {
+          console.log('can play video')
+          video.oncanplay = null;
+          $previewVideo.parent().show();
+          currentElement = video;
+          resolve(video)
+        };
+        video.onerror = (event) =>  {
+          video.onerror = null;
+          reject(event)
+        };
+        video.onabort = (event) =>  {
+          video.onabort = null;
+          reject(event)
+        };
+        // video.onsuspend = (event) =>  {
+        //   video.onsuspend = null;
+        //   reject(event)
+        // };
+        video.onstalled = (event) =>  {
+          video.onstalled = null;
+          reject(event)
+        };
+        if(!$source.length) {
+          $('<source/>', {
+            src: blob,
+          }).appendTo($previewVideo);
+        } else {
+          video.onabort = null;
+          video.pause();
+          $source.attr('src', blob);
+          video.load();
+        }
       }
-      currentElement = $previewVideo[0];
-      $previewVideo.parent().show();
-    }
-    $previewContainer.show();
+    });
   };
 
   const preprocessFile = (file) => {
     const reader = new FileReader();
-    reader.addEventListener("load", () => {
-      showPreview(reader.result, file.type)
+    reader.addEventListener("load", async () => {
+      try {
+        const resource = await showPreview(reader.result, file.type);
+        if(resource.localName === 'video') {
+          $('#download-btn').attr('disabled', true);
+        }
+        $submitForm.find('[type="submit"]').removeAttr('disabled');
+        $previewContainer.show();
+      } catch(err) {
+        console.error(err);
+        $submitForm.find('[type="submit"]').attr('disabled', true);
+      }
     }, false);
     if (file) {
       reader.readAsDataURL(file);

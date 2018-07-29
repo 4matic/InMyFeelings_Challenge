@@ -5,6 +5,8 @@
       <title>PoseNet - Submit & Process Your Own File</title>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js" integrity="sha384-5DyzDgtTHw1bbnR1u2aQPxi5+e1KVPsygV5Pioo5W+5ua3sN5AHF05kzM0QfXXqm" crossorigin="anonymous"></script>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/black/pace-theme-flat-top.min.css" integrity="sha384-nz0Dqfwx+305JB8MlTpbsM0NNXkHixT8pmXnIMvTb8r8OM5fh/wc3gFhr+m/i/a2" crossorigin="anonymous">
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
       <style>
         .submit-form {
@@ -106,7 +108,7 @@
           This is the code for this <a href="https://youtu.be/prswDGGmYaE" target="_blank">this</a> video on Youtube by Siraj Raval as part of the <a href="https://www.google.com/search?q=InMyFeelingsChallenge" target="_blank">#InMyFeelingsChallenge</a> dance competition. The challenge is to create your own AI to dance to this song and submit it via Twitter, Facebook, Youtube, Instagram, or LinkedIn (or all of them) using the <code>#InMyFeelingsChallenge</code> hashtag.
         </p>
         <p>
-          Page load size is about <span class="badge badge-warning">~ 13.5 MB</span> so be patient and wait for the full page load.
+          Page load size is about <span class="badge badge-warning">~ 13.5 MB</span> which includes <a class="badge badge-primary" href="https://github.com/tensorflow/tfjs-models/tree/master/posenet">PoseNet Tensorflow Model</a> so be patient and wait for the full page load.
           <br />
           In this demo you can process both picture and video. I used <span class="badge badge-success">.mp4</span> files downloaded from <a href="https://giphy.com/" target="_blank">Giphy.com</a>.
           <br/>
@@ -126,7 +128,7 @@
           <div class="form-group">
             <input class="form-control" type="url" id="giphy-link" aria-describedby="giphy-link-example" placeholder="Insert direct link to picture or video">
             <small id="giphy-link-example" class="text-muted">
-              <div style="text-align: center">
+              <div style="text-align: center; padding-top: 0.5rem;">
                 Just click on links below to try:
               </div>
               <a class="try-link" href="https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4" data-pose="single">https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4</a>,
@@ -183,6 +185,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
 
     <script src="demo_util.js"></script>
     <script src="stats.min.js "></script>
