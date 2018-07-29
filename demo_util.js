@@ -15,7 +15,6 @@
  * =============================================================================
  */
 
-const color = 'aqua';
 const lineWidth = 2;
 
 function toTuple({ y, x }) {
@@ -37,7 +36,7 @@ function drawSegment([ay, ax], [by, bx], color, scale, ctx) {
 /**
  * Draws a pose skeleton by looking up all adjacent keypoints/joints
  */
-function drawSkeleton(keypoints, minConfidence, ctx, scale = 1) {
+function drawSkeleton(keypoints, minConfidence, ctx, color, scale = 1) {
   const adjacentKeyPoints = posenet.getAdjacentKeyPoints(
     keypoints, minConfidence);
 
@@ -50,7 +49,7 @@ function drawSkeleton(keypoints, minConfidence, ctx, scale = 1) {
 /**
  * Draw pose keypoints onto a canvas
  */
-function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
+function drawKeypoints(keypoints, minConfidence, ctx, color, scale = 1) {
   for (let i = 0; i < keypoints.length; i++) {
     const keypoint = keypoints[i];
 

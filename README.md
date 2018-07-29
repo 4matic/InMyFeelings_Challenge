@@ -2,7 +2,7 @@
 This fork has become a tool for pose estimation.
 I did this in order to always have the opportunity to evaluate pose estimation on a single web page using images or videos.
 
-**Added support for WebM video download with pose estimation skeleton.**
+**Added support for WebM video download with pose estimation skeleton.** It uses [captureStream method](https://caniuse.com/#search=captureStream), in the form of a MediaStream.
 
 ## Coding Challenge - Due Date, August 1 2018 at 12 PM PST
 

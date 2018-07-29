@@ -11,7 +11,7 @@
           border: 2px solid #ddd;
           border-radius: .25rem;
           padding: 1.5rem 1rem;
-          margin: 1rem 0;
+          margin: 2rem 0 1rem;
         }
         .preview {
           border: 2px solid #ddd;
@@ -66,6 +66,36 @@
         #giphy-link-example + div {
           display: block;
         }
+        .download-group {
+          display: flex;
+          justify-content: flex-end;
+          padding: 1rem 0 0;
+        }
+        .jumbotron {
+          padding-bottom: 1rem;
+        }
+        .created-by {
+          margin: 0;
+          display: flex;
+          justify-content: flex-end;
+          font-style: italic;
+        }
+        .download-group > .form-group {
+          display: flex;
+          flex-grow: 1;
+          margin: 0;
+          align-items: center;
+          justify-content: flex-start;
+        }
+        .download-group > .form-group > label {
+          margin: 0;
+        }
+        #colorpicker {
+          display: flex;
+          margin-left: 2rem;
+          width: auto;
+          min-width: 7rem;
+        }
       </style>
   </head>
   <body>
@@ -73,15 +103,14 @@
       <div class="jumbotron mt-3">
         <h1>PoseNet - Submit & Process Your Own File</h1>
         <p class="lead">
-          This is the code for this <a href="https://youtu.be/prswDGGmYaE" target="_blank">this</a> video on Youtube by Siraj Raval as part of the <a href="https://www.google.com/search?q=InMyFeelingsChallenge" target="_blank">#InMyFeelingsChallenge</a> dance competition.
-          <br />
-          In this demo you can process both picture and video.
-          <br/>
-          I used <span class="badge">.mp4</span> files downloaded from <a href="https://giphy.com/">Giphy.com</a>.
-          <br/>
-          You can download WebM video of pose estimation after process.<br />
-          <i class="text-muted">Sometimes it may happen that the video may pause without actual pausing(bug?lag?). If this happened just use the video rewind.</i>
+          This is the code for this <a href="https://youtu.be/prswDGGmYaE" target="_blank">this</a> video on Youtube by Siraj Raval as part of the <a href="https://www.google.com/search?q=InMyFeelingsChallenge" target="_blank">#InMyFeelingsChallenge</a> dance competition. The challenge is to create your own AI to dance to this song and submit it via Twitter, Facebook, Youtube, Instagram, or LinkedIn (or all of them) using the #InMyFeelingsChallenge hashtag.
         </p>
+        <p>
+          In this demo you can process both picture and video. I used <span class="badge">.mp4</span> files downloaded from <a href="https://giphy.com/" target="_blank">Giphy.com</a>.
+          <br/>
+          You can download WebM video of pose estimation after process. It uses <a href="https://caniuse.com/#search=captureStream" target="_blank">captureStream method</a>, so some browsers can't do that.<br />
+        </p>
+        <p class="text-muted"><i>Sometimes it may happen that the video may pause without actual pausing(bug?lag?). If this happened just use the video rewind.</i></p>
         <form class="submit-form">
           <div class="form-group">
             <div class="custom-file">
@@ -94,9 +123,6 @@
           </h4>
           <div class="form-group">
             <input class="form-control" type="url" id="giphy-link" aria-describedby="giphy-link-example" placeholder="Insert direct link to picture or video">
-                   <!--pattern="https://media.giphy.com/.*\.mp4"-->
-                   <!--title="The URL must be from giphy.com & ends with .mp4"-->
-
             <small id="giphy-link-example" class="text-muted">
               e.g: <a class="try-link" href="https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4" data-pose="single">https://media.giphy.com/media/j3gsT2RsH9K0w/giphy.mp4</a>,
               <a class="try-link" href="https://i.imgur.com/NpPY3oW.mp4" data-pose="single">https://i.imgur.com/NpPY3oW.mp4</a>,
@@ -104,11 +130,17 @@
             </small>
           </div>
           <button class="btn btn-lg btn-block btn-primary" type="submit" disabled>Process</button>
-          <div class="btn-group" role="group">
-            <button id="download-btn" type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Download WebM Video</button>
-            <div class="dropdown-menu" aria-labelledby="download-btn">
-              <a class="download-skeleton dropdown-item" href="#">Only skeleton</a>
-              <a class="download-skeleton-original dropdown-item" href="#">Skeleton + Original</a>
+          <div class="download-group">
+            <div class="form-group">
+              <label for="colorpicker">Choose color for pose estimator</label>
+              <input class="form-control" type="color" id="colorpicker" value="#00ffff">
+            </div>
+            <div class="btn-group" role="group">
+              <button id="download-btn" type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>Download WebM Video</button>
+              <div class="dropdown-menu" aria-labelledby="download-btn">
+                <a class="download-skeleton dropdown-item" href="#">Only skeleton</a>
+                <a class="download-skeleton-original dropdown-item" href="#">Skeleton + Original</a>
+              </div>
             </div>
           </div>
         </form>
@@ -135,37 +167,20 @@
           <br>
           <br> Thank you <a href="https://js.tensorflow.org" target="_blank" rel="noopener">TensorFlow.js</a> for your flexible and intuitive APIs.
         </p>
+        <p class="text-muted created-by">Created by Maxim Maximov in 2018</p>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.2/build/dat.gui.js"></script>
+    <script src="https://unpkg.com/@tensorflow/tfjs"></script>
+    <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
 
-      <!--<div id="loading">-->
-          <!--Loading the model...-->
-      <!--</div>-->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
-      <!--<div id='main'>-->
-        <!--<video-->
-          <!--id="video"-->
-          <!--poster="https://media.giphy.com/media/JJGUejl0pLcRy/200_s.gif"-->
-          <!--style="margin:0;padding:0"-->
-          <!--width="200"-->
-          <!--height="164"-->
-          <!--loop>-->
-            <!--<source src="./video4.mp4" type="video/mp4" />-->
-            <!--Your browser does not support the mp4 video codec.-->
-        <!--</video>-->
-        <!--<canvas id="output" />-->
-      <!--</div>-->
-      <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.2/build/dat.gui.js"></script>
-      <script src="https://unpkg.com/@tensorflow/tfjs"></script>
-      <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
-      <script src="https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
-
-      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
-      <script src="demo_util.js"></script>
-      <script src="stats.min.js "></script>
-      <script src="main.js"></script>
+    <script src="demo_util.js"></script>
+    <script src="stats.min.js "></script>
+    <script src="main.js"></script>
   </body>
 </html>

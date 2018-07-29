@@ -7,7 +7,7 @@ const isMobile = () => isAndroid() || isiOS();
 let currentElement,
   net,
   isStopped = true,
-  canvasWidth, canvasHeight;
+  canvasWidth, canvasHeight, color = '#00ffff';
 
 const mediaSource = new MediaSource();
 mediaSource.addEventListener('sourceopen', handleSourceOpen, false);
@@ -153,13 +153,13 @@ const setupFPS = () => {
   document.body.appendChild(stats.dom);
 };
 
-const downloadVideo = () => {
+const downloadVideo = (name) => {
   const blob = new Blob(recordedBlobs, {type: 'video/webm'});
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.style.display = 'none';
   a.href = url;
-  a.download = 'test.webm';
+  a.download = `${name}.webm`;
   document.body.appendChild(a);
   a.click();
   setTimeout(() => {
@@ -245,10 +245,10 @@ function detectPoseInRealTime(element, net) {
     poses.forEach(({ score, keypoints }) => {
       if (score >= minPoseConfidence) {
         if (guiState.output.showPoints) {
-          drawKeypoints(keypoints, minPartConfidence, ctx, scale);
+          drawKeypoints(keypoints, minPartConfidence, ctx, color, scale);
         }
         if (guiState.output.showSkeleton) {
-          drawSkeleton(keypoints, minPartConfidence, ctx, scale);
+          drawSkeleton(keypoints, minPartConfidence, ctx, color, scale);
         }
       }
     });
@@ -312,17 +312,26 @@ jQuery(document).ready(function($){
   const $submitForm = $('.submit-form');
   const $previewContainer = $('.preview');
   const $output = $('#output');
+  const $colorpicker = $('#colorpicker');
 
   $fileInput.change((event) => {
     event.preventDefault();
+    $('#download-btn').attr('disabled', true);
     const file = event.target.files[0];
     preprocessFile(file);
     $previewContainer.find('.title').text('Preview');
-    $submitForm.find('[type="submit"]').removeAttr('disabled')
+    $submitForm.find('[type="submit"]').removeAttr('disabled');
+    $giphyLink.parent().find('.invalid-feedback').remove();
+  });
+
+  $colorpicker.change((event) => {
+    event.preventDefault();
+    color = event.target.value;
   });
 
   $giphyLink.change(async (event) => {
     try {
+      $('#download-btn').attr('disabled', true);
       $giphyLink.parent().find('.invalid-feedback').remove();
       event.preventDefault();
       const link = event.target.value;
@@ -339,7 +348,7 @@ jQuery(document).ready(function($){
     }
   });
 
-  const playAndDownloadVideo = (type) => {
+  const playAndDownloadVideo = (type, name) => {
     if(type === 'skeleton') {
       guiState.output.showVideo = false;
       guiState.output.showSkeleton = true;
@@ -361,18 +370,18 @@ jQuery(document).ready(function($){
     };
     video.onended = () => {
       stopRecording();
-      downloadVideo();
+      downloadVideo(name);
       video.onended = null;
     };
   };
 
   $('.download-skeleton').on('click', (e) => {
     e.preventDefault();
-    playAndDownloadVideo('skeleton');
+    playAndDownloadVideo('skeleton', 'pose-estimation-skeleton');
   });
   $('.download-skeleton-original').on('click', (e) => {
     e.preventDefault();
-    playAndDownloadVideo('skeleton-original');
+    playAndDownloadVideo('skeleton-original', 'pose-estimation');
   });
   $('.try-link').on('click', (e) => {
     e.preventDefault();
@@ -409,7 +418,7 @@ jQuery(document).ready(function($){
 
       currentElement.width = undefined;
       currentElement.height = undefined;
-
+      $('#download-btn').removeAttr('disabled');
       detectPoseInRealTime(currentElement, net);
     } else {
       $submitForm.prepend('<div class="alert alert-danger">Choose file or specify URL first!</div>')
